@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koło Zadań</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            min-width: 200px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-add:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-spin {
+            background: #ff6b6b;
+            color: white;
+            font-size: 18px;
+            padding: 15px 30px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .btn-spin:hover:not(:disabled) {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .btn-spin:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .options-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remove-option {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+
+        .wheel-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .wheel {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 8px solid #333;
+            transition: transform 2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            box-sizing: border-box;
+            padding-left: 30px;
+        }
+
+        .wheel-segment .segment-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #333;
+            z-index: 10;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .result p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .wheel {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .input-controls {
+                flex-direction: column;
+            }
+            
+            input[type="text"] {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Koło Zadań</h1>
+        
+        <div class="input-section">
+            <div class="input-controls">
+                <input type="text" id="optionInput" placeholder="Wpisz zadanie..." maxlength="50">
+                <button class="btn btn-add" onclick="addOption()">Dodaj</button>
+            </div>
+            
+            <div class="options-list" id="optionsList"></div>
+            
+            <p style="color: #666; font-size: 14px; margin-top: 10px;">
+                Opcji: <span id="optionCount">0</span>/20 (minimum 2 do zakręcenia)
+            </p>
+        </div>
+
+        <button class="btn btn-spin" id="spinBtn" onclick="spinWheel()" disabled>
+            🎯 Zakręć kołem!
+        </button>
+
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="wheel"></div>
+        </div>
+
+        <div class="result" id="result">
+            <h3>🎉 Wybrane zadanie:</h3>
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        let options = [];
+        let isSpinning = false;
+        
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+            '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2',
+            '#A3E4D7', '#F9E79F', '#D5A6BD', '#AED6F1', '#A9DFBF'
+        ];
+
+        function addOption() {
+            const input = document.getElementById('optionInput');
+            const text = input.value.trim();
+            
+            if (text === '') {
+                alert('Proszę wpisać tekst!');
+                return;
+            }
+            
+            if (options.length >= 20) {
+                alert('Maksymalnie 20 opcji!');
+                return;
+            }
+            
+            if (options.includes(text)) {
+                alert('Ta opcja już istnieje!');
+                return;
+            }
+            
+            options.push(text);
+            input.value = '';
+            updateDisplay();
+        }
+
+        function removeOption(index) {
+            options.splice(index, 1);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const optionsList = document.getElementById('optionsList');
+            const optionCount = document.getElementById('optionCount');
+            const spinBtn = document.getElementById('spinBtn');
+            
+            optionsList.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'option-tag';
+                tag.style.backgroundColor = colors[index % colors.length];
+                tag.innerHTML = `
+                    ${option}
+                    <button class="remove-option" onclick="removeOption(${index})">×</button>
+                `;
+                optionsList.appendChild(tag);
+            });
+            
+            optionCount.textContent = options.length;
+            spinBtn.disabled = options.length < 2 || isSpinning;
+            
+            createWheel();
+        }
+
+        function createWheel() {
+            const wheel = document.getElementById('wheel');
+            wheel.innerHTML = '';
+            
+            if (options.length === 0) {
+                // Puste koło
+                wheel.style.backgroundColor = '#e0e0e0';
+                return;
+            }
+            
+            if (options.length === 1) {
+                // Jedno zadanie - całe koło w jednym kolorze
+                wheel.style.backgroundColor = colors[0];
+                return;
+            }
+            
+            // Więcej niż jedno zadanie - dzielimy na wycinki
+            wheel.style.backgroundColor = 'transparent';
+            
+            if (options.length === 2) {
+                // Dwie opcje - dwie połowy koła
+                const half1 = document.createElement('div');
+                half1.style.position = 'absolute';
+                half1.style.width = '100%';
+                half1.style.height = '50%';
+                half1.style.backgroundColor = colors[0];
+                half1.style.top = '0';
+                half1.style.left = '0';
+                wheel.appendChild(half1);
+                
+                const half2 = document.createElement('div');
+                half2.style.position = 'absolute';
+                half2.style.width = '100%';
+                half2.style.height = '50%';
+                half2.style.backgroundColor = colors[1];
+                half2.style.bottom = '0';
+                half2.style.left = '0';
+                wheel.appendChild(half2);
+                return;
+            }
+            
+            if (options.length === 3) {
+                // Trzy opcje - używamy SVG dla idealnych wycinków
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.position = 'absolute';
+                svg.setAttribute('viewBox', '0 0 300 300');
+                
+                const centerX = 150;
+                const centerY = 150;
+                const radius = 150;
+                
+                for (let i = 0; i < 3; i++) {
+                    const startAngle = (i * 120) * Math.PI / 180;
+                    const endAngle = ((i + 1) * 120) * Math.PI / 180;
+                    
+                    const x1 = centerX + radius * Math.cos(startAngle);
+                    const y1 = centerY + radius * Math.sin(startAngle);
+                    const x2 = centerX + radius * Math.cos(endAngle);
+                    const y2 = centerY + radius * Math.sin(endAngle);
+                    
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
+                    path.setAttribute('d', pathData);
+                    path.setAttribute('fill', colors[i]);
+                    
+                    svg.appendChild(path);
+                }
+                
+                wheel.appendChild(svg);
+                return;
+            }
+            
+            // Cztery lub więcej opcji - używamy wycinków
+            const segmentAngle = 360 / options.length;
+            
+            options.forEach((option, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.style.backgroundColor = colors[index % colors.length];
+                segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(${90 - segmentAngle}deg)`;
+                wheel.appendChild(segment);
+            });
+        }
+
+        function spinWheel() {
+            if (isSpinning || options.length < 2) return;
+            
+            isSpinning = true;
+            const spinBtn = document.getElementById('spinBtn');
+            const result = document.getElementById('result');
+            const wheel = document.getElementById('wheel');
+            
+            spinBtn.disabled = true;
+            result.classList.remove('show');
+            
+            // Losowy kąt obrotu (minimum 2 pełne obroty + dodatkowe obroty dla efektu)
+            const randomAngle = Math.random() * 360;
+            const minRotations = 2; // minimum 2 pełne obroty
+            const extraRotations = Math.random() * 8 + 4; // dodatkowe 4-12 obrotów dla efektu
+            const totalRotation = (minRotations + extraRotations) * 360 + randomAngle;
+            
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            
+            setTimeout(() => {
+                // Oblicz który segment został wybrany
+                const normalizedAngle = (360 - (totalRotation % 360)) % 360;
+                const segmentAngle = 360 / options.length;
+                const selectedIndex = Math.floor(normalizedAngle / segmentAngle);
+                const selectedOption = options[selectedIndex];
+                
+                // Pokaż wynik
+                document.getElementById('resultText').textContent = selectedOption;
+                result.classList.add('show');
+                
+                // Usuń wybraną opcję
+                options.splice(selectedIndex, 1);
+                
+                setTimeout(() => {
+                    updateDisplay();
+                    isSpinning = false;
+                    
+                    if (options.length >= 2) {
+                        spinBtn.disabled = false;
+                    }
+                }, 1000);
+                
+            }, 2000);
+        }
+
+        // Dodawanie opcji po naciśnięciu Enter
+        document.getElementById('optionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addOption();
+            }
+        });
+
+        // Inicjalizacja
+        updateDisplay();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987bc04a36f2eeba',t:'MTc1OTMxOTUxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
